@@ -111,6 +111,8 @@ public class DataStore {
                     //Start time is 1 hour from now and then 1 hour from next day and so on
                     sampleShow.startTime = new Date(new Date().getTime() + (hour + day * i));
                     DataStore.saveShow(sampleShow);
+                    String[] seats = { "A01", "A02", "A03", "B01", "B02", "B03", "C01", "C02", "C03" };
+                    DataStore.saveTicket(new Ticket(sampleUser, sampleShow, seats, 300));
                 }
             }
         }
