@@ -6,6 +6,10 @@ import java.util.ArrayList;
 public class Utils {
     //Method to check if the input is a valid email
     public static boolean isValidEmail(String input) {
+        //If the string is empty then it is invalid
+        if (isEmptyString(input))
+            return false;
+
         //Email has @ sign, so split at the @ sign
         String[] chunks = input.split("@");
 
@@ -52,6 +56,10 @@ public class Utils {
 
     //Method to check if the input is a valid phone number
     public static boolean isValidPhone(String input) {
+        //If the string is empty then it is invalid
+        if (isEmptyString(input))
+            return false;
+
         //The input must be of length 10
         if (input.length() != 10)
             return false;
@@ -66,6 +74,10 @@ public class Utils {
 
     //Method to check if the input is a username
     public static boolean isValidUsername(String input) {
+        //If the string is empty then it is invalid
+        if (isEmptyString(input))
+            return false;
+
         //Username must be atleast 3 characters in length
         if (input.length() < 3)
             return false;
@@ -81,6 +93,10 @@ public class Utils {
 
     //Method to check if the input has any uppercase characters
     public static boolean hasUpperCaseChar(String input) {
+        //If the string is empty then it is invalid
+        if (isEmptyString(input))
+            return false;
+
         //Loop through string and return true when a char is uppercase
         for (char c : input.toCharArray())
             if (Character.isUpperCase(c))
@@ -92,6 +108,10 @@ public class Utils {
 
     //Method to check if the input has any lowercase characters
     public static boolean hasLowerCaseChar(String input) {
+        //If the string is empty then it is invalid
+        if (isEmptyString(input))
+            return false;
+
         //Loop through string and return true when a char is lowercase
         for (char c : input.toCharArray())
             if (Character.isLowerCase(c))
@@ -103,6 +123,10 @@ public class Utils {
 
     //Method to check if the input has any special characters
     public static boolean hasSpecialChar(String input) {
+        //If the string is empty then it is invalid
+        if (isEmptyString(input))
+            return false;
+
         //Loop through string and return true when a char is a special char
         for (char c : input.toCharArray())
             if (!Character.isLetterOrDigit(c))
@@ -114,6 +138,10 @@ public class Utils {
 
     //Method to check if the input is a valid number with a decimal point
     public static boolean isValidNumberWithDecimal(String input) {
+        //If the string is empty then it is invalid
+        if (isEmptyString(input))
+            return false;
+
         //Loop through string and return false when a char is a not a number or decimal
         for (char c : input.toCharArray())
             if (!Character.isDigit(c) && c != '.')
@@ -125,6 +153,10 @@ public class Utils {
 
     //Method to check if the input is a valid number, ie., it has only digits
     public static boolean isValidNumber(String input) {
+        //If the string is empty then it is invalid
+        if (isEmptyString(input))
+            return false;
+
         for (char c : input.toCharArray())
             if (!Character.isDigit(c))
                 return false;
@@ -135,6 +167,10 @@ public class Utils {
 
     //Method to check if the input is a valid seat ID
     public static boolean isValidSeatID(String input) {
+        //If the string is empty then it is invalid
+        if (isEmptyString(input))
+            return false;
+
         //The first character must be a letter
         if (!Character.isLetter(input.charAt(0)))
             return false;
@@ -151,21 +187,21 @@ public class Utils {
 
     //Method to check if a string is empty ("") or null
     public static boolean isEmptyString(String s) {
-        return s == null || s.length() == 0;
+        return s == null || s.trim().length() == 0;
     }
 
-    //Method to count how many times the substring appears in the larger string
-    public static int countOccurances(String text, String str) {
-        if (isEmptyString(text) || isEmptyString(str))
+    //Method to count how many times the string appears in the text
+    public static int countOccurances(String text, String string) {
+        if (isEmptyString(text) || isEmptyString(string))
             return 0;
 
         int index = 0, count = 0;
 
         while (true) {
-            index = text.indexOf(str, index);
+            index = text.indexOf(string, index);
             if (index != -1) {
                 count++;
-                index += str.length();
+                index += string.length();
             } else
                 break;
         }
@@ -173,7 +209,7 @@ public class Utils {
         return count;
     }
 
-    //Method to paginate lists
+    //Method to paginate any list
     public static <T> ArrayList<ArrayList<T>> paginate(ArrayList<T> list, int maxItemsPerPage) {
         ArrayList<ArrayList<T>> res = new ArrayList<ArrayList<T>>();
 

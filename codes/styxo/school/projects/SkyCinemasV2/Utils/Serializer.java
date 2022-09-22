@@ -1,9 +1,6 @@
 package codes.styxo.school.projects.SkyCinemasV2.Utils;
 
-//Class that helps to store data as a string in files,
-//there is a better way to do this,
-//But it is not in our syllabus,
-//So can't use that...
+//Class that helps to store data as a string in files
 public class Serializer {
     //This is the null control character,
     //I'm using this to separate different properties of the data objects

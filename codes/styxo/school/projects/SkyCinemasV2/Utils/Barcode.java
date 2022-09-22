@@ -1,11 +1,15 @@
 package codes.styxo.school.projects.SkyCinemasV2.Utils;
 
-//Class to handle barcode generation, these aren't standardized, just an internal format that might be used by the specific cinema
+//Class to handle barcode generation
+//Modified Universal Product Code standard to fit the application
+//These aren't standard, just an internal format that might be used by the specific cinema
 public class Barcode {
     //Because barcode scanner scans the black part, need to invert the colors in case of VSCode dark theme
     private static final boolean negateBarcodeForVSCode = true;
+    //These are the bounding characters for the barcode, in the specifications
     private static final String sideGuard = "101";
     private static final String centerGuard = "01010";
+    //The barcode spec defines these specific values for both sides of the barcode
     private static final String[] leftEncoding = {
             "0001101",
             "0011001",

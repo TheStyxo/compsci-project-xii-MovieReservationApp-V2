@@ -4,6 +4,7 @@ import codes.styxo.school.projects.SkyCinemasV2.Data.DataStore;
 import codes.styxo.school.projects.SkyCinemasV2.UI.Menu;
 
 public class App {
+    //Demo mode to demonstrate app use with sample data
     public static boolean demoMode = false;
 
     public static void main(String[] args) {
