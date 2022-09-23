@@ -113,6 +113,8 @@ public class DataStore {
                     DataStore.saveShow(sampleShow);
                     String[] seats = { "A01", "A02", "A03", "B01", "B02", "B03", "C01", "C02", "C03" };
                     DataStore.saveTicket(new Ticket(sampleUser, sampleShow, seats, 300));
+                    String[] seats2 = { "A04", "A05", "A06", "B04", "B05", "B06", "C04", "C05", "C06" };
+                    DataStore.saveTicket(new Ticket(admin, sampleShow, seats2, 300));
                 }
             }
         }
@@ -593,15 +595,33 @@ public class DataStore {
                 currentLine = ticketsFileInput.readLine();
             }
             ticketsFileInput.close();
-            return res;
         } catch (IOException e) {
             System.out.println("Error: " + e);
         }
 
-        for (int i = 0; i < res.size() - 1; i++) {
+        //If not found return null
+        return res;
+    }
+
+    public static ArrayList<Ticket> getSortedAndFilteredTickets(ArrayList<Ticket> tickets, boolean upcomingOnly,
+            boolean ascending, String sortMethod) {
+        System.out.println(tickets.size() + " inside getSortedAndFilteredTickets");
+        switch (sortMethod) {
+            case "Show Date":
+                return sortTicketsByShowDate(filterTickets(tickets, upcomingOnly), ascending);
+            case "Date Purchased":
+            default:
+                return sortTicketsByDatePurchased(filterTickets(tickets, upcomingOnly), ascending);
+        }
+    }
+
+    public static ArrayList<Ticket> sortTicketsByDatePurchased(ArrayList<Ticket> tickets, boolean ascending) {
+        ArrayList<Ticket> res = new ArrayList<Ticket>(tickets);
+        for (int i = 0; i < tickets.size() - 1; i++) {
             int index = i;
             for (int j = i + 1; j < res.size(); j++) {
-                if (res.get(j).show.startTime.getTime() > res.get(index).show.startTime.getTime()) {
+                //Sort by ID since ID is incrementing, lower means earlier purchased
+                if ((Long.parseLong(res.get(j).id) > Long.parseLong(res.get(index).id)) ^ ascending) {
                     index = j;//searching for highest index  
                 }
             }
@@ -609,9 +629,35 @@ public class DataStore {
             res.set(index, res.get(i));
             res.set(i, temp);
         }
-
-        //If not found return null
         return res;
+    }
+
+    public static ArrayList<Ticket> sortTicketsByShowDate(ArrayList<Ticket> tickets, boolean ascending) {
+        ArrayList<Ticket> res = new ArrayList<Ticket>(tickets);
+        for (int i = 0; i < tickets.size() - 1; i++) {
+            int index = i;
+            for (int j = i + 1; j < res.size(); j++) {
+                if ((res.get(j).show.startTime.getTime() > res.get(index).show.startTime.getTime()) ^ ascending) {
+                    index = j;//searching for highest index  
+                }
+            }
+            Ticket temp = res.get(index);
+            res.set(index, res.get(i));
+            res.set(i, temp);
+        }
+        return res;
+    }
+
+    public static ArrayList<Ticket> filterTickets(ArrayList<Ticket> tickets, boolean upcomingOnly) {
+        ArrayList<Ticket> res = new ArrayList<Ticket>(tickets);
+        if (upcomingOnly) {
+            long nowTime = new Date().getTime();
+            for (Ticket ticket : tickets)
+                if (ticket.show.startTime.getTime() > nowTime)
+                    res.add(ticket);
+            return res;
+        }
+        return tickets;
     }
 
     public static CustomArrayList<Show> getShowsArray() {

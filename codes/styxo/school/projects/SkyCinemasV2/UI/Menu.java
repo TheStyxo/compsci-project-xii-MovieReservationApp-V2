@@ -530,6 +530,7 @@ public class Menu {
                     DataStore.saveTicket(ticket);
                     for (Seat seat : seats)
                         seat.state = 2;
+                    UI.setError("Ticket booked successfully.");
                     return true;
                 case "b":
                     return false;
@@ -939,8 +940,6 @@ public class Menu {
         final CustomArrayList<String> options = new CustomArrayList<String>();
         options.add("C - Cancel.");
         options.add("X - Close app. [warning: deletes all data]");
-        options.add(" ");
-        options.add("Searching for: "); //3
 
         CustomArrayList<Movie> fetchedMovies = DataStore.getMoviesArray();
         ArrayList<ArrayList<Movie>> pages = Utils.paginate(fetchedMovies, maxItemsPerPage);
@@ -991,12 +990,12 @@ public class Menu {
                             state = MenuState.LOGGED_IN_MAIN;
                     } else {
                         clearPage(options, pages, currentPage, additionalElements);
-                        options.set(3, "Searching for: " + input);
                         //Create the filtered list
                         pages = Utils.paginate(FuzzySearch.sortMovies(input, fetchedMovies), maxItemsPerPage);
                         currentPage = 0;
 
                         renderMoviesPage(options, pages, currentPage);
+                        options.set(3, "Searching for: " + input);
                     }
 
             }
@@ -1017,10 +1016,12 @@ public class Menu {
     private static int renderMoviesPage(CustomArrayList<String> options, ArrayList<ArrayList<Movie>> pages,
             int currentPage) {
         options.add(" ");
+        options.add("Searching for: "); //3
+        options.add(" ");
         options.add("________________");
         options.add("Available Movies");
         options.add("________________");
-        int additionalElements = 4;
+        int additionalElements = 6;
         if (pages.size() == 0)
             options.add("NO MOVIES AVAILABLE");
         else {
@@ -1037,18 +1038,31 @@ public class Menu {
     }
 
     public static void view_bookings() {
-        UI.setHeaderPrimaryContent("Sky Cinemas - View Bookings");
         final CustomArrayList<String> options = new CustomArrayList<String>();
+        options.add("S - Toggle sorting method.");
+        options.add("O - Toggle sorting order.");
+        options.add("U - Toggle upcoming only. (This shows only upcoming shows that haven't started yet.)");
         options.add("B - Back.");
         options.add("C - Cancel.");
         options.add("X - Close app. [warning: deletes all data]");
+        options.add(" ");
+        options.add("Sorting: Date Added (most recent -> oldest)");
+        options.add("Show Upcoming Only: ON");
 
         ArrayList<Ticket> fetchedTickets = DataStore.getTickets(UI.user);
-        ArrayList<ArrayList<Ticket>> pages = Utils.paginate(fetchedTickets, maxItemsPerPage);
+        System.out.println(fetchedTickets.size() + " inside view bookings");
+        String sortMethod = "Date Added";
+        boolean ascending = false;
+        boolean upcomingOnly = true;
+        ArrayList<ArrayList<Ticket>> pages = Utils.paginate(
+                DataStore.getSortedAndFilteredTickets(fetchedTickets, upcomingOnly, ascending, sortMethod),
+                maxItemsPerPage);
+        System.out.println(pages.size() + " pages inside view bookings");
         int currentPage = 0;
         int additionalElements = renderTicketsPage(options, pages, currentPage);
 
         while (state == MenuState.VIEW_BOOKINGS) {
+            UI.setHeaderPrimaryContent("Sky Cinemas - View Bookings");
             UI.setPageContent(options);
             UI.setFooterContent("Select an option or a ticket to continue.");
             UI.renderView();
@@ -1064,6 +1078,39 @@ public class Menu {
                 case "b":
                 case "c":
                     state = MenuState.LOGGED_IN_MAIN;
+                    break;
+                case "s":
+                    sortMethod = sortMethod.equals("Date Added") ? "Show Date" : "Date Added";
+                    clearPage(options, pages, currentPage, additionalElements);
+                    pages = Utils.paginate(
+                            DataStore.getSortedAndFilteredTickets(fetchedTickets, upcomingOnly, ascending, sortMethod),
+                            maxItemsPerPage);
+                    currentPage = 0;
+                    additionalElements = renderTicketsPage(options, pages, currentPage);
+                    options.set(7, "Sorting: " + sortMethod + " ("
+                            + (ascending ? "ascending" : "descending") + ")");
+                    break;
+                case "o":
+                    ascending = !ascending;
+                    clearPage(options, pages, currentPage, additionalElements);
+                    pages = Utils.paginate(
+                            DataStore.getSortedAndFilteredTickets(fetchedTickets, upcomingOnly, ascending, sortMethod),
+                            maxItemsPerPage);
+                    currentPage = 0;
+                    additionalElements = renderTicketsPage(options, pages, currentPage);
+                    options.set(7, "Sorting: " + sortMethod + " ("
+                            + (ascending ? "ascending" : "descending") + ")");
+                    break;
+                case "u":
+                    upcomingOnly = !ascending;
+                    clearPage(options, pages, currentPage, additionalElements);
+                    pages = Utils.paginate(
+                            DataStore.getSortedAndFilteredTickets(fetchedTickets, upcomingOnly, ascending, sortMethod),
+                            maxItemsPerPage);
+                    currentPage = 0;
+                    additionalElements = renderTicketsPage(options, pages, currentPage);
+                    options.set(7, "Sorting: " + sortMethod + " ("
+                            + (ascending ? "ascending" : "descending") + ")");
                     break;
                 case "<":
                     if (currentPage > 0) {
@@ -1120,14 +1167,15 @@ public class Menu {
         options.add("X - Close app. [warning: deletes all data]");
 
         options.add(" ");
-        options.add("________________");
+        options.add("__________________");
         options.add("Ticket Information");
-        options.add("________________");
+        options.add("__________________");
         options.add(" ");
         options.add("Movie: " + ticket.show.movie.name);
         options.add("Date: " + TimeUtils.displayFormat_DateOnly.format(ticket.show.startTime));
         options.add("Time: " + TimeUtils.displayFormat_TimeOnly.format(ticket.show.startTime));
-        options.add("Seats: " + String.join(",", ticket.seats));
+        options.add("Screen: " + "Screen-" + ticket.show.screenID);
+        options.add("Seats: " + String.join(", ", ticket.seats));
         options.add("Price: Rs." + ticket.cost);
         options.add(" ");
         options.add("______________");
@@ -1153,7 +1201,7 @@ public class Menu {
             switch (input.toLowerCase()) {
                 case "b":
                 case "c":
-                    state = MenuState.LOGGED_IN_MAIN;
+                    state = MenuState.VIEW_BOOKINGS;
                     break loop;
                 case "x":
                     state = MenuState.CLOSED;
@@ -1312,6 +1360,7 @@ public class Menu {
                                 DataStore.saveMovie(tempMovie);
                                 tempMovie = null;
                                 state = MenuState.ADMIN_MENU;
+                                UI.setError("Movie was added successfully.");
                             }
                             break;
                         default:
@@ -1393,16 +1442,11 @@ public class Menu {
                     boolean exit = false;
                     switch (pref) {
                         case "movie name":
-                            CustomArrayList<Movie> movies = DataStore.getMoviesArray();
+                            CustomArrayList<Movie> fetchedMovies = DataStore.getMoviesArray();
+                            ArrayList<ArrayList<Movie>> pages = Utils.paginate(fetchedMovies, maxItemsPerPage);
+                            int currentPage = 0;
 
-                            options.add(" ");
-                            options.add("Available Movies");
-                            options.add("________________");
-                            if (movies.size() == 0)
-                                options.add("NO MOVIES AVAILABLE");
-
-                            for (int i = 0; i < movies.size(); i++)
-                                options.add((i + 1) + " - " + movies.get(i).name);
+                            int additionalElements = renderMoviesPage(options, pages, currentPage);
 
                             while (!exit) {
                                 UI.setFooterContent("Select a movie or select an option.");
@@ -1415,78 +1459,96 @@ public class Menu {
                                     break;
                                 }
 
-                                if (Utils.isValidNumber(movieInput)
-                                        && Integer.parseInt(movieInput) <= movies.size()
-                                        && Integer.parseInt(movieInput) > 0) {
-                                    tempShow.movie = movies.get(Integer.parseInt(movieInput) - 1);
-                                    //Remove movie selection options
-                                    options.removeRange(options.size() - (movies.size() == 0 ? 1 : movies.size() + 3),
-                                            options.size());
-
-                                    if (tempShow.startTime != null) {
-                                        Show overlappingShow = DataStore.getOverlappingShow(tempShow.startTime,
-                                                tempShow.movie.duration);
-                                        if (overlappingShow != null) {
-                                            UI.setError(String.format(
-                                                    "This show overlaps another show which starts at %s and ends at %s",
-                                                    TimeUtils.format(overlappingShow.startTime),
-                                                    TimeUtils.format(new Date(overlappingShow.startTime.getTime()
-                                                            + overlappingShow.movie.duration.toMillis()))));
-                                            tempShow.movie = null;
-                                            continue; //Break so that the pref is not set to null
+                                switch (movieInput.toLowerCase()) {
+                                    case "<":
+                                        if (currentPage > 0) {
+                                            clearPage(options, pages, currentPage, additionalElements);
+                                            --currentPage;
+                                            additionalElements = renderMoviesPage(options, pages, currentPage);
                                         }
-                                    }
+                                        break;
+                                    case ">":
+                                        if (currentPage < pages.size() - 1) {
+                                            clearPage(options, pages, currentPage, additionalElements);
+                                            ++currentPage;
+                                            additionalElements = renderMoviesPage(options, pages, currentPage);
+                                        }
+                                        break;
+                                    case "n":
+                                        pref = "movie name";
+                                        clearPage(options, pages, currentPage, additionalElements);
+                                        exit = true;
+                                        break;
+                                    case "s":
+                                        pref = "show screen";
+                                        clearPage(options, pages, currentPage, additionalElements);
+                                        exit = true;
+                                        break;
+                                    case "t":
+                                        pref = "start time (hh:mm dd/mm/yyyy in 24 hour format)";
+                                        clearPage(options, pages, currentPage, additionalElements);
+                                        exit = true;
+                                        break;
+                                    case "c":
+                                        tempShow = null;
+                                        state = MenuState.ADMIN_MENU;
+                                        exit = true;
+                                        break;
+                                    case "x":
+                                        UI.user = null;
+                                        tempShow = null;
+                                        state = MenuState.CLOSED;
+                                        exit = true;
+                                        break;
+                                    default:
+                                        if (Utils.isValidNumber(movieInput)
+                                                && Integer.parseInt(movieInput) <= pages.get(currentPage).size()
+                                                && Integer.parseInt(movieInput) > 0) {
+                                            tempShow.movie = pages.get(currentPage)
+                                                    .get(Integer.parseInt(movieInput) - 1);
+                                            //Remove movie selection options
+                                            clearPage(options, pages, currentPage, additionalElements);
 
-                                    //Display the selected movie
-                                    options.set(8, "Name: " + tempShow.movie.name);
-                                    options.set(10, "Show Duration: " + TimeUtils.format(tempShow.movie.duration));
-                                    pref = null;
-                                    exit = true;
-                                } else {
-                                    pref = null;
-                                    switch (movieInput.toLowerCase()) {
-                                        case "n":
-                                            pref = "movie name";
+                                            if (tempShow.startTime != null) {
+                                                Show overlappingShow = DataStore.getOverlappingShow(tempShow.startTime,
+                                                        tempShow.movie.duration);
+                                                if (overlappingShow != null) {
+                                                    UI.setError(String.format(
+                                                            "This show overlaps another show which starts at %s and ends at %s",
+                                                            TimeUtils.format(overlappingShow.startTime),
+                                                            TimeUtils.format(new Date(overlappingShow.startTime
+                                                                    .getTime()
+                                                                    + overlappingShow.movie.duration.toMillis()))));
+                                                    tempShow.movie = null;
+                                                    continue; //Break so that the pref is not set to null
+                                                }
+                                            }
+
+                                            //Display the selected movie
+                                            options.set(8, "Name: " + tempShow.movie.name);
+                                            options.set(10,
+                                                    "Show Duration: " + TimeUtils.format(tempShow.movie.duration));
+                                            pref = null;
                                             exit = true;
-                                            break;
-                                        case "s":
-                                            pref = "show screen";
-                                            exit = true;
-                                            break;
-                                        case "t":
-                                            pref = "start time (hh:mm dd/mm/yyyy in 24 hour format)";
-                                            exit = true;
-                                            break;
-                                        case "c":
-                                            tempShow = null;
-                                            state = MenuState.ADMIN_MENU;
-                                            exit = true;
-                                            break;
-                                        case "x":
-                                            UI.user = null;
-                                            tempShow = null;
-                                            state = MenuState.CLOSED;
-                                            exit = true;
-                                            break;
-                                        default:
-                                            UI.setError(
-                                                    "Invalid option provided, select a movie or select an option.");
-                                    }
+                                        } else {
+                                            clearPage(options, pages, currentPage, additionalElements);
+                                            //Create the filtered list
+                                            pages = Utils.paginate(FuzzySearch.sortMovies(movieInput, fetchedMovies),
+                                                    maxItemsPerPage);
+                                            currentPage = 0;
+
+                                            renderMoviesPage(options, pages, currentPage);
+                                            options.set(13, "Searching for: " + movieInput);
+                                        }
                                 }
                             }
                             break;
                         case "show screen":
                             CustomArrayList<Integer> screenIDs = DataStore.getScreenIDs();
+                            ArrayList<ArrayList<Integer>> screenPages = Utils.paginate(screenIDs, maxItemsPerPage);
+                            int currentScreenPage = 0;
 
-                            options.add(" ");
-                            options.add("Available Screens");
-                            options.add("_________________");
-                            if (screenIDs.size() == 0)
-                                options.add("NO SCREENS AVAILABLE");
-
-                            for (int i = 0; i < screenIDs.size(); i++)
-                                options.add(String.format((i + 1) + " - " + "Screen-%d",
-                                        screenIDs.get(i)));
+                            int additionalScreenElements = renderScreensList(options, screenPages, currentScreenPage);
 
                             while (!exit) {
                                 UI.setFooterContent("Select a screen or select an option.");
@@ -1500,12 +1562,11 @@ public class Menu {
                                 }
 
                                 if (Utils.isValidNumber(screenInput)
-                                        && Integer.parseInt(screenInput) <= screenIDs.size()
+                                        && Integer.parseInt(screenInput) <= screenPages.get(currentScreenPage).size()
                                         && Integer.parseInt(screenInput) > 0) {
-                                    tempShow.screenID = screenIDs.get(Integer.parseInt(screenInput) - 1);
-                                    options.removeRange(
-                                            options.size() - (screenIDs.size() == 0 ? 1 : screenIDs.size() + 3),
-                                            options.size());
+                                    tempShow.screenID = screenPages.get(currentScreenPage)
+                                            .get(Integer.parseInt(screenInput) - 1);
+                                    clearPage(options, screenPages, currentScreenPage, additionalScreenElements);
                                     options.set(9, "Screen: Screen-" + Integer.toString(tempShow.screenID));
                                     pref = null;
                                     exit = true;
@@ -1515,14 +1576,20 @@ public class Menu {
                                         case "n":
                                             pref = "movie name";
                                             exit = true;
+                                            clearPage(options, screenPages, currentScreenPage,
+                                                    additionalScreenElements);
                                             break;
                                         case "s":
                                             pref = "show screen";
                                             exit = true;
+                                            clearPage(options, screenPages, currentScreenPage,
+                                                    additionalScreenElements);
                                             break;
                                         case "t":
                                             pref = "start time (hh:mm dd/mm/yyyy in 24 hour format)";
                                             exit = true;
+                                            clearPage(options, screenPages, currentScreenPage,
+                                                    additionalScreenElements);
                                             break;
                                         case "c":
                                             tempShow = null;
@@ -1574,6 +1641,7 @@ public class Menu {
                         case "confirmation":
                             if (input.toLowerCase().equals("y")) {
                                 DataStore.saveShow(tempShow);
+                                UI.setError("Show was added successfully!");
                                 tempShow = null;
                                 state = MenuState.ADMIN_MENU;
                             }
@@ -1585,6 +1653,30 @@ public class Menu {
             }
         }
         useState();
+    }
+
+    private static int renderScreensList(CustomArrayList<String> options, ArrayList<ArrayList<Integer>> pages,
+            int currentPage) {
+        options.add(" ");
+        options.add("________________");
+        options.add("Available Screens");
+        options.add("________________");
+        int additionalElements = 4;
+        if (pages.size() == 0)
+            options.add("NO SCREENS AVAILABLE");
+        else {
+            for (int i = 0; i < pages.get(currentPage).size(); i++) {
+                options.add(
+                        (i + 1) + " - " + "Screen: " + pages.get(currentPage).get(i));
+            }
+            if (pages.size() > 1) {
+                options.add(" ");
+                options.add("Page " + (currentPage + 1) + " of " + pages.size());
+                options.add("Use '<' or '>' to move between pages.");
+                additionalElements += 3;
+            }
+        }
+        return additionalElements;
     }
 
     /**

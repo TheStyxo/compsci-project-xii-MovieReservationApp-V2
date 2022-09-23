@@ -93,6 +93,20 @@ public class ShowScreenInstance {
         } catch (IOException e) {
             System.out.println("Error: " + e);
         }
+        //Add screen ID to the schema's first line center
+        String firstLine = schema.split("\n")[0];
+        String screenLabel = "Screen-" + show.screenID;
+        //Prioritize left alignment
+        //Everything to left is math.floor
+        //Everything to right is math.ceil
+        int leftFirstLine = (int) Math.floor(firstLine.length() / 2);
+        int rightFirstLine = (int) Math.ceil(firstLine.length() / 2);
+        //Reverse the ceil and floor on the label to align it to the left
+        int leftScreenLabel = (int) Math.ceil(screenLabel.length() / 2);
+        int rightScreenLabel = (int) Math.floor(screenLabel.length() / 2);
+        final String finalString = firstLine.substring(0, leftFirstLine - leftScreenLabel) + screenLabel
+                + firstLine.substring(rightFirstLine + rightScreenLabel);
+        schema = finalString + schema.substring(firstLine.length());
     }
 
     public Seat getSeatByID(String ID) {

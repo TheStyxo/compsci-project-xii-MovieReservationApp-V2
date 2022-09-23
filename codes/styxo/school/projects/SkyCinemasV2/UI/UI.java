@@ -24,8 +24,8 @@ public class UI {
     private static String footerContent = "Select an option";
     //These are the minimum page dimensions regardless of the content
     //Just for asthetic purposes, to not make the page look too small when there's less content
-    private static final int minPageWidth = 50;
-    private static final int minPageHeight = 15;
+    private static final int minPageWidth = 200;
+    private static final int minPageHeight = 50;
     public static String error = null;
     public static User user = null;
 
@@ -147,13 +147,13 @@ public class UI {
 
     //Method to clear screen
     public static void clearScreen() {
-        //System.out.print("\n".repeat(5));
-        try {
-            //Clear the terminal screen using commands
-            new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor();
-        } catch (Exception e) {
-            //Fall back to printing a large amount of lines to clear screen as a backup
-            System.out.print("\n".repeat(300));
-        }
+        System.out.print("\n".repeat(5));
+        // try {
+        //     //Clear the terminal screen using commands
+        //     new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor();
+        // } catch (Exception e) {
+        //     //Fall back to printing a large amount of lines to clear screen as a backup
+        //     System.out.print("\n".repeat(300));
+        // }
     }
 }
