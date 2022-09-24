@@ -606,6 +606,8 @@ public class DataStore {
     public static ArrayList<Ticket> getSortedAndFilteredTickets(ArrayList<Ticket> tickets, boolean upcomingOnly,
             boolean ascending, String sortMethod) {
         System.out.println(tickets.size() + " inside getSortedAndFilteredTickets");
+        ArrayList<Ticket> res = filterTickets(tickets, upcomingOnly);
+        System.out.println(res.size() + " after filterTickets");
         switch (sortMethod) {
             case "Show Date":
                 return sortTicketsByShowDate(filterTickets(tickets, upcomingOnly), ascending);
@@ -637,8 +639,8 @@ public class DataStore {
         for (int i = 0; i < tickets.size() - 1; i++) {
             int index = i;
             for (int j = i + 1; j < res.size(); j++) {
-                if ((res.get(j).show.startTime.getTime() > res.get(index).show.startTime.getTime()) ^ ascending) {
-                    index = j;//searching for highest index  
+                if ((res.get(j).show.startTime.getTime() < res.get(index).show.startTime.getTime()) ^ ascending) {
+                    index = j;//searching for lowest index  
                 }
             }
             Ticket temp = res.get(index);
@@ -649,7 +651,7 @@ public class DataStore {
     }
 
     public static ArrayList<Ticket> filterTickets(ArrayList<Ticket> tickets, boolean upcomingOnly) {
-        ArrayList<Ticket> res = new ArrayList<Ticket>(tickets);
+        ArrayList<Ticket> res = new ArrayList<Ticket>();
         if (upcomingOnly) {
             long nowTime = new Date().getTime();
             for (Ticket ticket : tickets)

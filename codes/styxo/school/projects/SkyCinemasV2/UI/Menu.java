@@ -99,7 +99,7 @@ public class Menu {
         final CustomArrayList<String> options = new CustomArrayList<String>();
         options.add("1 - Login.");
         options.add("2 - Register new account.");
-        options.add("X - Close app. [warning: deletes all data]");
+        options.add("X - Close app.");
 
         UI.setPageContent(options);
         UI.setFooterContent("Select an option.");
@@ -150,7 +150,7 @@ public class Menu {
         options.add("P - Edit phone number.");
         options.add("S - Edit password.");
         options.add("C - Cancel login.");
-        options.add("X - Close app. [warning: deletes all data]");
+        options.add("X - Close app.");
         options.add(" ");
         options.add("Account Details");
         options.add("_______________");
@@ -341,7 +341,7 @@ public class Menu {
         //Set the options
         final CustomArrayList<String> options = new CustomArrayList<String>();
         options.add("C - Cancel login.");
-        options.add("X - Close app. [warning: deletes all data]");
+        options.add("X - Close app.");
         UI.setPageContent(options);
 
         //Set the footer message for input username
@@ -438,7 +438,7 @@ public class Menu {
             if (UI.user.isAdmin)
                 options.add("A - Admin panel.");
             options.add("L - Log out.");
-            options.add("X - Close app. [warning: deletes all data]");
+            options.add("X - Close app.");
 
             UI.setPageContent(options);
             UI.setFooterContent("Select an option.");
@@ -482,7 +482,7 @@ public class Menu {
         final CustomArrayList<String> options = new CustomArrayList<String>();
         options.add("B - Edit Seats.");
         options.add("C - Cancel.");
-        options.add("X - Close app. [warning: deletes all data]");
+        options.add("X - Close app.");
         options.add(" ");
         options.add("Ticket Info");
         options.add("___________");
@@ -553,7 +553,7 @@ public class Menu {
         final CustomArrayList<String> options = new CustomArrayList<String>();
         options.add("B - Go back to Show Selection.");
         options.add("C - Cancel.");
-        options.add("X - Close app. [warning: deletes all data]");
+        options.add("X - Close app.");
         options.add(" ");
         options.add("Selected movie");
         options.add("______________");
@@ -648,7 +648,7 @@ public class Menu {
         options.add("S - Select seat type to filter.");
         options.add("B - Go back to Movie Selection.");
         options.add("C - Cancel.");
-        options.add("X - Close app. [warning: deletes all data]");
+        options.add("X - Close app.");
         options.add(" ");
         options.add("Selected movie");
         options.add("______________");
@@ -939,7 +939,7 @@ public class Menu {
 
         final CustomArrayList<String> options = new CustomArrayList<String>();
         options.add("C - Cancel.");
-        options.add("X - Close app. [warning: deletes all data]");
+        options.add("X - Close app.");
 
         CustomArrayList<Movie> fetchedMovies = DataStore.getMoviesArray();
         ArrayList<ArrayList<Movie>> pages = Utils.paginate(fetchedMovies, maxItemsPerPage);
@@ -1044,19 +1044,21 @@ public class Menu {
         options.add("U - Toggle upcoming only. (This shows only upcoming shows that haven't started yet.)");
         options.add("B - Back.");
         options.add("C - Cancel.");
-        options.add("X - Close app. [warning: deletes all data]");
+        options.add("X - Close app.");
         options.add(" ");
         options.add("Sorting: Date Added (most recent -> oldest)");
         options.add("Show Upcoming Only: ON");
 
         ArrayList<Ticket> fetchedTickets = DataStore.getTickets(UI.user);
-        System.out.println(fetchedTickets.size() + " inside view bookings");
         String sortMethod = "Date Added";
         boolean ascending = false;
         boolean upcomingOnly = true;
         ArrayList<ArrayList<Ticket>> pages = Utils.paginate(
                 DataStore.getSortedAndFilteredTickets(fetchedTickets, upcomingOnly, ascending, sortMethod),
                 maxItemsPerPage);
+        ArrayList<Ticket> d = DataStore.getSortedAndFilteredTickets(fetchedTickets, upcomingOnly, ascending,
+                sortMethod);
+        System.out.println(d.size() + " inside view bookings");
         System.out.println(pages.size() + " pages inside view bookings");
         int currentPage = 0;
         int additionalElements = renderTicketsPage(options, pages, currentPage);
@@ -1088,7 +1090,7 @@ public class Menu {
                     currentPage = 0;
                     additionalElements = renderTicketsPage(options, pages, currentPage);
                     options.set(7, "Sorting: " + sortMethod + " ("
-                            + (ascending ? "ascending" : "descending") + ")");
+                            + (ascending ? "oldest -> most recent" : "most recent -> oldest") + ")");
                     break;
                 case "o":
                     ascending = !ascending;
@@ -1099,10 +1101,10 @@ public class Menu {
                     currentPage = 0;
                     additionalElements = renderTicketsPage(options, pages, currentPage);
                     options.set(7, "Sorting: " + sortMethod + " ("
-                            + (ascending ? "ascending" : "descending") + ")");
+                            + (ascending ? "oldest -> most recent" : "most recent -> oldest") + ")");
                     break;
                 case "u":
-                    upcomingOnly = !ascending;
+                    upcomingOnly = !upcomingOnly;
                     clearPage(options, pages, currentPage, additionalElements);
                     pages = Utils.paginate(
                             DataStore.getSortedAndFilteredTickets(fetchedTickets, upcomingOnly, ascending, sortMethod),
@@ -1110,7 +1112,7 @@ public class Menu {
                     currentPage = 0;
                     additionalElements = renderTicketsPage(options, pages, currentPage);
                     options.set(7, "Sorting: " + sortMethod + " ("
-                            + (ascending ? "ascending" : "descending") + ")");
+                            + (ascending ? "oldest -> most recent" : "most recent -> oldest") + ")");
                     break;
                 case "<":
                     if (currentPage > 0) {
@@ -1164,7 +1166,7 @@ public class Menu {
         final CustomArrayList<String> options = new CustomArrayList<String>();
         options.add("B - Back.");
         options.add("C - Cancel.");
-        options.add("X - Close app. [warning: deletes all data]");
+        options.add("X - Close app.");
 
         options.add(" ");
         options.add("__________________");
@@ -1230,7 +1232,7 @@ public class Menu {
             options.add("A - Add a show to listing.");
             options.add("B - Go back to main ");
             options.add("L - Log out.");
-            options.add("X - Close app. [warning: deletes all data]");
+            options.add("X - Close app.");
             UI.setPageContent(options);
 
             UI.setFooterContent("Select an option.");
@@ -1277,7 +1279,7 @@ public class Menu {
         options.add("P - Edit base cost.");
         options.add("D - Edit movie streaming duration.");
         options.add("C - Cancel.");
-        options.add("X - Close app. [warning: deletes all data]");
+        options.add("X - Close app.");
         options.add(" ");
         options.add("Movie Details");
         options.add("_____________");
@@ -1381,7 +1383,7 @@ public class Menu {
         options.add("S - Edit movie screen.");
         options.add("T - Edit movie streaming start time.");
         options.add("C - Cancel.");
-        options.add("X - Close app. [warning: deletes all data]");
+        options.add("X - Close app.");
         options.add(" ");
         options.add("Show Details");
         options.add("____________");

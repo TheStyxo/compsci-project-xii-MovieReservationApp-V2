@@ -147,13 +147,13 @@ public class UI {
 
     //Method to clear screen
     public static void clearScreen() {
-        System.out.print("\n".repeat(5));
-        // try {
-        //     //Clear the terminal screen using commands
-        //     new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor();
-        // } catch (Exception e) {
-        //     //Fall back to printing a large amount of lines to clear screen as a backup
-        //     System.out.print("\n".repeat(300));
-        // }
+        //System.out.print("\n".repeat(5));
+        try {
+            //Clear the terminal screen using commands
+            new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor();
+        } catch (Exception e) {
+            //Fall back to printing a large amount of lines to clear screen as a backup
+            System.out.print("\n".repeat(300));
+        }
     }
 }
